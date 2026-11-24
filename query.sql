@@ -4,16 +4,20 @@
 
 -- Member activity: everyone who posted or was seen in the last :days days,
 -- with when they last posted anywhere and when they last posted in an RP
--- category (the listed categories and their subcategories).
+-- category (the listed categories and all their subcategories).
 -- Counts regular posts in regular topics only: no private messages, small
 -- actions, whispers or deleted posts. Used by the Member Activity theme
 -- component. Keep the column names as they are.
 
-WITH rp AS (
+WITH RECURSIVE rp AS (
+  -- The listed categories and every category under them, at any depth.
   SELECT c.id
   FROM categories c
   WHERE c.id = ANY (string_to_array(NULLIF(:rp_category_ids, ''), ',')::int[])
-     OR c.parent_category_id = ANY (string_to_array(NULLIF(:rp_category_ids, ''), ',')::int[])
+  UNION
+  SELECT c.id
+  FROM categories c
+  JOIN rp ON c.parent_category_id = rp.id
 ),
 since AS (
   SELECT CURRENT_TIMESTAMP - (:days * INTERVAL '1 day') AS cutoff

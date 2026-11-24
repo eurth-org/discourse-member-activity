@@ -92,14 +92,23 @@ function sortActive(list, sort, view) {
   return sorted;
 }
 
-function sortIdle(list, view) {
-  const age = (m) => (view === "rp" ? m.rpAge : m.postAge);
+// The list under the chart, most recent post first, like the chart. In the RP
+// view: by last RP post, then (for those who never made one) by last post of
+// any kind, then by last seen. "Fewest days left first" turns it around.
+export function sortIdle(list, view, sort = "left") {
+  const keys = view === "rp" ? ["rpAge", "postAge", "seenDays"] : ["postAge", "seenDays"];
+  const byName = (a, b) => a.username.localeCompare(b.username);
+  if (sort === "name") return [...list].sort(byName);
+  const dir = sort === "risk" ? -1 : 1;
   return [...list].sort((a, b) => {
-    const x = age(a), y = age(b);
-    if (x === null && y === null) return a.username.localeCompare(b.username);
-    if (x === null) return 1;
-    if (y === null) return -1;
-    return x - y;
+    for (const k of keys) {
+      const x = a[k], y = b[k];
+      if (x === y) continue;
+      if (x === null) return 1; // never: always last
+      if (y === null) return -1;
+      return (x - y) * dir;
+    }
+    return byName(a, b);
   });
 }
 
@@ -229,7 +238,12 @@ function idleRow(m, view, days) {
   const over = age === null ? OVERDUE_CAP : Math.min(OVERDUE_CAP, age - days);
   const what = view === "rp" ? "RP post" : "post";
   const first = age === null ? `never made ${view === "rp" ? "an RP post" : "a post"}` : `${plural(age - days, "day")} over`;
-  const second = age === null ? `seen ${ago(m.seenDays)}` : `last ${what} ${dateFmt.format(new Date(last))} · seen ${ago(m.seenDays)}`;
+  // Someone who never made an RP post may still have posted out of character.
+  const fallback = view === "rp" && m.lastPost ? `last post ${dateFmt.format(new Date(m.lastPost))} · ` : "";
+  const second =
+    age === null
+      ? `${fallback}seen ${ago(m.seenDays)}`
+      : `last ${what} ${dateFmt.format(new Date(last))} · seen ${ago(m.seenDays)}`;
   return h(
     "li",
     { class: "ma-row ma-row--idle", title: tooltip(m, days) },
@@ -386,7 +400,7 @@ export function renderMemberActivity(host, { load, defaultMonths = 3, maxMonths 
       h("h3", { class: "ma-heading ma-heading--idle" }, `${idleHeading} (${idle.length})`),
       h("p", { class: "ma-note" }, idleNote),
       idle.length
-        ? h("div", { class: "ma-chart ma-chart--idle" }, idleAxis(), h("ol", { class: "ma-rows" }, sortIdle(idle, state.view === "rp" ? "rp" : "all").map((m) => idleRow(m, state.view === "rp" ? "rp" : "all", shownDays))))
+        ? h("div", { class: "ma-chart ma-chart--idle" }, idleAxis(), h("ol", { class: "ma-rows" }, sortIdle(idle, state.view === "rp" ? "rp" : "all", state.sort).map((m) => idleRow(m, state.view === "rp" ? "rp" : "all", shownDays))))
         : h("p", { class: "ma-note" }, "Nobody.")
     );
   }
