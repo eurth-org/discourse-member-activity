@@ -10,6 +10,7 @@ What's planned and what each release added is in the [roadmap](roadmap.md).
 - **Three views**: all posts, posts in the RP categories, or both side by side (the RP bar is the striped one).
 - **Colours**: Eurth blue, turning yellow at 30 days left, orange at 14 and red at 7. Thin lines on the tracks mark where the colours change.
 - **Under the chart**: members seen on the forum in the period who didn't post in it, with a black bar growing left for how far past the limit they are (full width from a year over, or if they never posted). In the RP view this list is everyone active without an RP post.
+- Sort by most days left, fewest days left, last seen or name. The sort applies to both lists, which stay apart.
 - Point at a row for the member's last post, last RP post, post counts and when they were last seen.
 
 Posts count when they are regular posts in regular topics: no private messages, small actions, whispers or deleted posts.

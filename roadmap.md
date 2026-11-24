@@ -4,9 +4,11 @@
 
 - Nothing planned yet. Ideas welcome from staff once they've used it.
 
-## 24 November 2026: sorting the members who stopped posting
+## 24 November 2026: sorting, and last seen
 
 - The list under the chart is sorted like the chart: most recent post first. In the RP view, members without an RP post in the period are sorted by their last RP post, then by their last post of any kind, then by when they were last seen. "Fewest days left first" turns the order around, and "Name" sorts it by name.
+- New sort, **Last seen first**, for both lists. They stay split into members who posted and members who didn't.
+- Every row says when the member was last seen.
 - In the RP view, a member who never made an RP post shows the date of their last post of any kind.
 - RP categories now include subcategories at any depth, not only the first level.
 

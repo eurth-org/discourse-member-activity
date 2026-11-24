@@ -19,6 +19,7 @@ const VIEWS = [
 const SORTS = [
   { id: "left", label: "Most days left first" },
   { id: "risk", label: "Fewest days left first" },
+  { id: "seen", label: "Last seen first" },
   { id: "name", label: "Name" },
 ];
 
@@ -82,11 +83,20 @@ export function split(members, view, days) {
   return { active, idle };
 }
 
-function sortActive(list, sort, view) {
+// Most recently seen first; never seen last.
+function bySeen(a, b) {
+  if (a.seenDays === b.seenDays) return a.username.localeCompare(b.username);
+  if (a.seenDays === null) return 1;
+  if (b.seenDays === null) return -1;
+  return a.seenDays - b.seenDays || a.username.localeCompare(b.username);
+}
+
+export function sortActive(list, sort, view) {
   const key = (m) => (view === "rp" ? m.rpLeft : m.left) ?? m.rpLeft ?? 0;
   const byName = (a, b) => a.username.localeCompare(b.username);
   const sorted = [...list];
   if (sort === "name") sorted.sort(byName);
+  else if (sort === "seen") sorted.sort(bySeen);
   else if (sort === "risk") sorted.sort((a, b) => key(a) - key(b) || byName(a, b));
   else sorted.sort((a, b) => key(b) - key(a) || byName(a, b));
   return sorted;
@@ -99,6 +109,7 @@ export function sortIdle(list, view, sort = "left") {
   const keys = view === "rp" ? ["rpAge", "postAge", "seenDays"] : ["postAge", "seenDays"];
   const byName = (a, b) => a.username.localeCompare(b.username);
   if (sort === "name") return [...list].sort(byName);
+  if (sort === "seen") return [...list].sort(bySeen);
   const dir = sort === "risk" ? -1 : 1;
   return [...list].sort((a, b) => {
     for (const k of keys) {
@@ -223,13 +234,20 @@ function activeRow(m, view, days) {
         "span",
         { class: "ma-label" },
         h("span", {}, leftText(m.left, m.posts, "All:")),
-        h("span", {}, leftText(m.rpLeft, m.rpPosts, "RP:"))
+        h("span", {}, leftText(m.rpLeft, m.rpPosts, "RP:")),
+        h("span", { class: "ma-seen" }, `seen ${ago(m.seenDays)}`)
       )
     );
   }
   const left = view === "rp" ? m.rpLeft : m.left;
   const count = view === "rp" ? m.rpPosts : m.posts;
-  return h("li", { class: "ma-row", title }, who(m), bar(left, days, view), h("span", { class: "ma-label" }, leftText(left, count)));
+  return h(
+    "li",
+    { class: "ma-row", title },
+    who(m),
+    bar(left, days, view),
+    h("span", { class: "ma-label" }, h("span", {}, leftText(left, count)), h("span", { class: "ma-seen" }, `seen ${ago(m.seenDays)}`))
+  );
 }
 
 function idleRow(m, view, days) {
