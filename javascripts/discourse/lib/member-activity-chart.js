@@ -83,12 +83,14 @@ export function split(members, view, days) {
   return { active, idle };
 }
 
-// Most recently seen first; never seen last.
+// Most recently seen first, to the second; never seen last.
 function bySeen(a, b) {
-  if (a.seenDays === b.seenDays) return a.username.localeCompare(b.username);
-  if (a.seenDays === null) return 1;
-  if (b.seenDays === null) return -1;
-  return a.seenDays - b.seenDays || a.username.localeCompare(b.username);
+  const x = a.lastSeen ? Date.parse(a.lastSeen) : null;
+  const y = b.lastSeen ? Date.parse(b.lastSeen) : null;
+  if (x === y) return a.username.localeCompare(b.username);
+  if (x === null) return 1;
+  if (y === null) return -1;
+  return y - x;
 }
 
 export function sortActive(list, sort, view) {
