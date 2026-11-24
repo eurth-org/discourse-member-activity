@@ -1,0 +1,317 @@
+// Member Activity chart. Colours: Eurth blue, then yellow, orange and red as
+// a member runs out of days; black for members past the limit.
+
+.ma {
+  --ma-blue: #2698d4;
+  --ma-yellow: #f2c12e;
+  --ma-orange: #f28a1e;
+  --ma-red: #d7263d;
+  --ma-black: #000;
+  --ma-track: var(--primary-very-low);
+  --ma-guide: var(--primary-low-mid);
+  --ma-bar-height: 1.1rem;
+
+  margin: 1em 0;
+  font-variant-numeric: tabular-nums;
+
+  &.ma--loading .ma-body {
+    opacity: 0.5;
+    transition: opacity 0.2s;
+  }
+}
+
+.ma-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.ma-caption {
+  color: var(--primary-high);
+  font-size: var(--font-down-1);
+  margin-right: 0.4rem;
+}
+
+.ma-period {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.ma-period-value {
+  min-width: 10.5em;
+  text-align: center;
+  font-weight: bold;
+}
+
+.ma-step {
+  min-width: 2.5em;
+  font-weight: bold;
+}
+
+.ma-views {
+  display: flex;
+
+  .ma-view {
+    border-radius: 0;
+    margin: 0;
+
+    &:first-child {
+      border-radius: var(--d-button-border-radius, 4px) 0 0 var(--d-button-border-radius, 4px);
+    }
+
+    &:last-child {
+      border-radius: 0 var(--d-button-border-radius, 4px) var(--d-button-border-radius, 4px) 0;
+    }
+
+    &.btn-primary {
+      background: var(--ma-blue);
+      color: #fff;
+    }
+  }
+}
+
+.ma-sort {
+  margin: 0;
+  width: auto;
+}
+
+.ma-summary {
+  margin: 0 0 0.5rem;
+}
+
+.ma-note {
+  color: var(--primary-high);
+  margin: 0 0 0.75rem;
+}
+
+.ma-error {
+  color: var(--danger);
+}
+
+.ma-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1.25rem;
+  list-style: none;
+  margin: 0 0 1rem;
+  padding: 0;
+  font-size: var(--font-down-1);
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+}
+
+.ma-swatch {
+  display: inline-block;
+  width: 1.5em;
+  height: 0.8em;
+  border-radius: 2px;
+}
+
+.ma-heading {
+  margin: 1.5rem 0 0.5rem;
+}
+
+.ma-heading--idle {
+  margin-top: 2.5rem;
+}
+
+// One row: who, the bar, and the words.
+.ma-row {
+  display: grid;
+  grid-template-columns: minmax(7rem, 11rem) minmax(8rem, 1fr) minmax(9rem, 14rem);
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.15rem 0;
+}
+
+.ma-rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  .ma-row:hover {
+    background: var(--highlight-bg, var(--tertiary-very-low));
+  }
+}
+
+.ma-who {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+  color: var(--primary);
+}
+
+.ma-avatar {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+}
+
+.ma-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ma-track {
+  position: relative;
+  display: flex;
+  height: var(--ma-bar-height);
+  background-color: var(--ma-track);
+  border-radius: 2px;
+}
+
+// Guide lines at 30, 14 and 7 days left.
+.ma-chart .ma-track {
+  background-image:
+    linear-gradient(var(--ma-guide), var(--ma-guide)),
+    linear-gradient(var(--ma-guide), var(--ma-guide)),
+    linear-gradient(var(--ma-guide), var(--ma-guide));
+  background-size: 1px 100%;
+  background-repeat: no-repeat;
+  background-position:
+    var(--ma-g30) 0,
+    var(--ma-g14) 0,
+    var(--ma-g7) 0;
+}
+
+.ma-chart--idle .ma-track {
+  background-image: none;
+}
+
+.ma-bar {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+  min-width: 2px;
+  border-radius: 2px;
+}
+
+.ma-bar--blue {
+  background: var(--ma-blue);
+}
+
+.ma-bar--yellow {
+  background: var(--ma-yellow);
+}
+
+.ma-bar--orange {
+  background: var(--ma-orange);
+}
+
+.ma-bar--red {
+  background: var(--ma-red);
+}
+
+.ma-bar--black {
+  background: var(--ma-black);
+  // Stays visible on a dark colour scheme.
+  box-shadow: 0 0 0 1px var(--primary-low-mid);
+}
+
+// The black bars grow leftwards from the zero line on the right.
+.ma-track--neg {
+  justify-content: flex-end;
+}
+
+.ma-label {
+  display: flex;
+  flex-direction: column;
+  font-size: var(--font-down-1);
+  line-height: 1.25;
+  color: var(--primary-high);
+}
+
+.ma-seen {
+  color: var(--primary-medium);
+}
+
+// Both: two thinner bars, all posts above RP posts.
+.ma-row--both {
+  .ma-pair {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .ma-track {
+    height: calc(var(--ma-bar-height) * 0.6);
+  }
+
+  .ma-bar[data-kind="rp"] {
+    // A light stripe tells the RP bar apart from the one above it.
+    background-image: repeating-linear-gradient(
+      135deg,
+      rgb(255 255 255 / 0.35) 0 3px,
+      transparent 3px 7px
+    );
+  }
+}
+
+.ma-axis {
+  font-size: var(--font-down-2);
+  color: var(--primary-medium);
+  padding-bottom: 0.25rem;
+  border-bottom: 1px solid var(--primary-low);
+  margin-bottom: 0.25rem;
+}
+
+.ma-axis-title {
+  text-align: right;
+}
+
+.ma-axis-scale {
+  position: relative;
+  height: 1.2em;
+}
+
+.ma-tick {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  white-space: nowrap;
+
+  &:first-child {
+    transform: none;
+  }
+}
+
+.ma-axis-scale--neg .ma-tick {
+  transform: translateX(50%);
+
+  &:first-child {
+    transform: none;
+  }
+
+  &:last-child {
+    transform: translateX(100%);
+  }
+}
+
+// The last tick of the days-left axis ends at the end of the track.
+.ma-axis-scale:not(.ma-axis-scale--neg) .ma-tick:last-child:not(:first-child) {
+  transform: translateX(-100%);
+}
+
+@media (max-width: 640px) {
+  .ma-row {
+    grid-template-columns: minmax(6rem, 8rem) 1fr;
+  }
+
+  .ma-label {
+    grid-column: 2;
+  }
+
+  .ma-axis-title {
+    display: none;
+  }
+}
