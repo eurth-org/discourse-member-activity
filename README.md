@@ -8,7 +8,7 @@ What's planned and what each release added is in the [roadmap](roadmap.md).
 
 - **Who posted in the period** (3 months, or 90 days, unless you change it with − and +; a month counts as 30 days). Each member's bar counts down: someone who posted today has the whole period left, someone who posted 89 days ago has 1 day left before dropping off the list.
 - **Three views**: all posts, posts in the RP categories, or both side by side (the RP bar is the striped one).
-- **Colours**: Eurth blue, turning yellow at 30 days left, orange at 14 and red at 7. Thin lines on the tracks mark where the colours change.
+- **Colours**: Eurth blue, turning yellow at 30 days left, orange at 14 and red at 7, for the standard 3 months. Other periods keep the same shares of the period: a month turns yellow at 10 days left, orange at 5 and red at 2. The legend gives the day counts for the period on screen, and thin lines on the tracks mark where the colours change.
 - **Under the chart**: members seen on the forum in the period who didn't post in it, with a black bar growing left for how far past the limit they are (full width from a year over, or if they never posted). In the RP view this list is everyone active without an RP post.
 - Sort by most days left, fewest days left, last seen or name. The sort applies to both lists, which stay apart.
 - Point at a row for the member's last post, last RP post, post counts and when they were last seen.

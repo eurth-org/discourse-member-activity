@@ -23,10 +23,20 @@ const SORTS = [
   { id: "name", label: "Name" },
 ];
 
-export function band(daysLeft) {
-  if (daysLeft <= 7) return "red";
-  if (daysLeft <= 14) return "orange";
-  if (daysLeft <= 30) return "yellow";
+// Where the colours change. For the standard 90 days: yellow at 30 days left,
+// orange at 14, red at 7. Other periods keep the same shares of the period
+// (a third, 14/90 and 7/90), so a month turns yellow at 10, orange at 5 and
+// red at 2, and the colours mean the same thing at every period.
+export function thresholds(days) {
+  const at = (share) => Math.max(1, Math.round((days * share) / 90));
+  return { yellow: at(30), orange: at(14), red: at(7) };
+}
+
+export function band(daysLeft, days = 90) {
+  const t = thresholds(days);
+  if (daysLeft <= t.red) return "red";
+  if (daysLeft <= t.orange) return "orange";
+  if (daysLeft <= t.yellow) return "yellow";
   return "blue";
 }
 
@@ -188,7 +198,7 @@ function bar(left, days, kind) {
   if (left !== null) {
     track.append(
       h("span", {
-        class: `ma-bar ma-bar--${band(left)}`,
+        class: `ma-bar ma-bar--${band(left, days)}`,
         style: { width: `${(left / days) * 100}%` },
         "data-kind": kind,
       })
@@ -204,24 +214,27 @@ function leftText(left, count, kind) {
 }
 
 function axis(days) {
-  const ticks = [...new Set([0, 7, 14, 30, ...[60, 90, 180, 270, 360, 540, 720].filter((t) => t < days), days])]
-    .filter((t) => t <= days)
-    .sort((a, b) => a - b);
+  const t = thresholds(days);
+  const marks = [0, t.red, t.orange, t.yellow, days];
+  // Round numbers in between, where they don't crowd a mark already there.
+  const step = days <= 180 ? 30 : 90;
+  for (let d = step; d < days; d += step) {
+    if (marks.every((m) => Math.abs(m - d) / days > 0.07)) marks.push(d);
+  }
+  const ticks = [...new Set(marks)].sort((a, b) => a - b);
   const scale = h("span", { class: "ma-axis-scale", "aria-hidden": "true" });
-  // With a long window the 7, 14 and 30 marks crowd together: keep 30 and the end.
-  const crowded = days > 180;
-  for (const t of ticks) {
-    if (crowded && (t === 7 || t === 14)) continue;
-    scale.append(h("span", { class: "ma-tick", style: { left: `${(t / days) * 100}%` } }, t));
+  for (const d of ticks) {
+    scale.append(h("span", { class: "ma-tick", style: { left: `${(d / days) * 100}%` } }, d));
   }
   return h("div", { class: "ma-row ma-axis" }, h("span", { class: "ma-axis-title" }, "days left"), scale, h("span"));
 }
 
-// Where the colours change (30, 14 and 7 days left), as custom properties the
-// tracks draw thin guide lines from.
+// Where the colours change, as custom properties the tracks draw thin guide
+// lines from.
 function guideVars(days) {
-  const at = (t) => `${(Math.min(t, days) / days) * 100}%`;
-  return { "--ma-g30": at(30), "--ma-g14": at(14), "--ma-g7": at(7) };
+  const t = thresholds(days);
+  const at = (d) => `${(d / days) * 100}%`;
+  return { "--ma-g30": at(t.yellow), "--ma-g14": at(t.orange), "--ma-g7": at(t.red) };
 }
 
 function activeRow(m, view, days) {
@@ -285,17 +298,18 @@ function idleAxis() {
   return h("div", { class: "ma-row ma-axis" }, h("span", { class: "ma-axis-title" }, "days over"), scale, h("span"));
 }
 
-function legend() {
+function legend(days) {
+  const t = thresholds(days);
   const items = [
-    ["blue", "more than 30 days left"],
-    ["yellow", "30 days or fewer"],
-    ["orange", "14 days or fewer"],
-    ["red", "7 days or fewer"],
+    ["blue", `more than ${plural(t.yellow, "day")} left`],
+    ["yellow", `${plural(t.yellow, "day")} or fewer`],
+    ["orange", `${plural(t.orange, "day")} or fewer`],
+    ["red", `${plural(t.red, "day")} or fewer`],
   ];
   return h(
     "ul",
     { class: "ma-legend", "aria-label": "Colours" },
-    items.map(([c, t]) => h("li", {}, h("span", { class: `ma-swatch ma-bar--${c}`, "aria-hidden": "true" }), t))
+    items.map(([c, text]) => h("li", {}, h("span", { class: `ma-swatch ma-bar--${c}`, "aria-hidden": "true" }), text))
   );
 }
 
@@ -414,7 +428,7 @@ export function renderMemberActivity(host, { load, defaultMonths = 3, maxMonths 
         `${plural(allCount, "member")} posted in the last ${shownDays} days, ${rpCount} of them in RP. ` +
           `${plural(members.filter((m) => m.left === null).length, "more member was", "more members were")} seen without posting.`
       ),
-      legend(),
+      legend(shownDays),
       h("h3", { class: "ma-heading" }, `${heading} (${active.length})`),
       active.length ? chart : h("p", { class: "ma-note" }, "Nobody yet."),
       h("h3", { class: "ma-heading ma-heading--idle" }, `${idleHeading} (${idle.length})`),

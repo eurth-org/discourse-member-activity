@@ -4,6 +4,11 @@
 
 - Nothing planned yet. Ideas welcome from staff once they've used it.
 
+## 24 November 2026: colours for every period
+
+- The colours scale with the period. Yellow, orange and red start at the same shares of the period as 30, 14 and 7 days do in 90 days, so a month turns yellow at 10 days left, orange at 5 and red at 2. Before, the thresholds stayed at 30, 14 and 7 days whatever the period, so at 1 month no bar could be blue.
+- The legend, the guide lines and the axis marks follow the period on screen.
+
 ## 24 November 2026: sorting, and last seen
 
 - The list under the chart is sorted like the chart: most recent post first. In the RP view, members without an RP post in the period are sorted by their last RP post, then by their last post of any kind, then by when they were last seen. "Fewest days left first" turns the order around, and "Name" sorts it by name.
